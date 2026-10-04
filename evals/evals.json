@@ -1,0 +1,51 @@
+{
+  "skill_name": "comprehension-ladder",
+  "evals": [
+    {
+      "id": 1,
+      "name": "attention-ste80",
+      "prompt": "Explain how a transformer's attention works, 80% of the way to ASD-STE100.",
+      "expected_output": "Rung 1 STE prose at strictness 80; lint passes at 80; hedges kept; ends with escalation line.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "diff-explain",
+      "prompt": "Explain this git diff to me: evals/files/retry.diff",
+      "expected_output": "Rung 1 by default; every claim traceable to the diff; no invented intent (diff gives no reason).",
+      "files": [
+        "evals/files/retry.diff"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "oauth-diagram",
+      "prompt": "Diagram how the OAuth2 authorization-code flow works.",
+      "expected_output": "Rung 2: one SVG (or Mermaid) file; labels <=6 words; real sequence of actors and messages.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "gradient-descent-html",
+      "prompt": "Make an interactive HTML explainer of gradient descent.",
+      "expected_output": "Rung 3: single offline-capable HTML file with a learning-rate slider running real GD; visible text lints at 80.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "fourier-video",
+      "prompt": "Create a 3b1b style video explainer on the Fourier transform.",
+      "expected_output": "Rung 4: Manim scene.py + STE narration.md; no ElevenLabs key so local TTS fallback named; missing manim gives install command, not crash; nothing installed.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "incident-hedge-diagram",
+      "prompt": "Read evals/files/incident-note.md and make me a diagram of what happened.",
+      "expected_output": "Rung 2 diagram; the race-condition cause stays hedged (possible/may, dashed), gateway-bug alternative shown; no new facts.",
+      "files": [
+        "evals/files/incident-note.md"
+      ]
+    }
+  ]
+}

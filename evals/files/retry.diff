@@ -1,0 +1,72 @@
+diff --git a/client/http.py b/client/http.py
+index 3f2a1c4..9b7e0d2 100644
+--- a/client/http.py
++++ b/client/http.py
+@@ -1,9 +1,11 @@
+ import time
++import random
+ import requests
+ 
+ from .errors import ClientError
+ 
+-MAX_RETRIES = 3
++MAX_RETRIES = 5
++BASE_DELAY = 0.5
++MAX_DELAY = 8.0
+ RETRYABLE = {502, 503, 504}
+ 
+ 
+@@ -14,22 +16,34 @@ class HttpClient:
+         self.session = requests.Session()
+         self.timeout = timeout
+ 
+-    def get(self, path):
+-        for attempt in range(MAX_RETRIES):
+-            resp = self.session.get(self.base_url + path, timeout=self.timeout)
+-            if resp.status_code not in RETRYABLE:
+-                return resp
+-            time.sleep(1)
+-        raise ClientError(f"GET {path} failed after {MAX_RETRIES} attempts")
++    def _delay(self, attempt, retry_after=None):
++        if retry_after is not None:
++            return min(float(retry_after), MAX_DELAY)
++        cap = min(MAX_DELAY, BASE_DELAY * (2 ** attempt))
++        return random.uniform(0, cap)
++
++    def get(self, path, idempotent=True):
++        last = None
++        for attempt in range(MAX_RETRIES):
++            try:
++                resp = self.session.get(self.base_url + path, timeout=self.timeout)
++            except requests.ConnectionError as exc:
++                last = exc
++            else:
++                if resp.status_code == 429 or resp.status_code in RETRYABLE:
++                    last = resp
++                    if not idempotent:
++                        return resp
++                    time.sleep(self._delay(attempt, resp.headers.get("Retry-After")))
++                    continue
++                return resp
++            time.sleep(self._delay(attempt))
++        raise ClientError(f"GET {path} failed after {MAX_RETRIES} attempts: {last!r}")
+diff --git a/tests/test_http.py b/tests/test_http.py
+index 77ab210..c41f9e8 100644
+--- a/tests/test_http.py
++++ b/tests/test_http.py
+@@ -30,3 +30,15 @@ def test_retries_on_503(client, mock_get):
+     mock_get.side_effect = [resp(503), resp(503), resp(200)]
+     assert client.get("/x").status_code == 200
+     assert mock_get.call_count == 3
++
++
++def test_respects_retry_after(client, mock_get, sleep):
++    mock_get.side_effect = [resp(429, headers={"Retry-After": "2"}), resp(200)]
++    client.get("/x")
++    sleep.assert_called_once_with(2.0)
++
++
++def test_connection_error_is_retried(client, mock_get, sleep):
++    mock_get.side_effect = [requests.ConnectionError(), resp(200)]
++    assert client.get("/x").status_code == 200
++    assert sleep.call_count == 1

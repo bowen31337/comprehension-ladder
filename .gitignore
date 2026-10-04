@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+# rendered artifacts, if someone renders inside the repo
+explainers/
+media/
+audio/
+*.mp4
+*.wav

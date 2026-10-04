@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOPIC explained</title>
+<style>
+  /* comprehension-ladder rung-3 template. Replace every TOPIC / placeholder. Delete what you do not use. */
+  :root {
+    --bg: #fbfaf7; --panel: #ffffff; --ink: #1d1d1f; --muted: #6e6e73; --rule: #d9d6cf;
+    --accent: #1f5fbf; --warn: #c0392b; --good: #2e7d32;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141416; --panel: #1c1c1f; --ink: #ececf0; --muted: #9a9aa2; --rule: #34343a;
+      --accent: #6aa2ff; --warn: #ff7a6b; --good: #6fcf73;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141416; --panel: #1c1c1f; --ink: #ececf0; --muted: #9a9aa2; --rule: #34343a;
+    --accent: #6aa2ff; --warn: #ff7a6b; --good: #6fcf73;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+  header .kicker { font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 6px 0 10px; }
+  .summary { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
+  .short { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 6px; }
+  .short h2 { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 6px; color: var(--muted); }
+  .short ul { margin: 0; padding-left: 20px; }
+  section { margin-top: 44px; }
+  section > h2 { font-size: 22px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+  section > h2 .n { font: 600 13px var(--mono); background: var(--ink); color: var(--bg); padding: 2px 7px; border-radius: 3px; }
+  .figure { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; margin: 16px 0; }
+  .figure canvas, .figure svg { display: block; width: 100%; height: auto; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 12px; font: 14px var(--mono); }
+  .controls label { display: flex; gap: 8px; align-items: center; }
+  .controls input[type=range] { width: min(240px, 60vw); accent-color: var(--accent); }
+  .controls output { min-width: 4ch; color: var(--accent); }
+  button { font: 14px var(--mono); padding: 6px 12px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 5px; cursor: pointer; }
+  button:hover, button:focus-visible { border-color: var(--accent); outline: none; }
+  .caption { font-size: 15px; color: var(--muted); margin-top: 10px; min-height: 1.6em; }
+  .limits { border-top: 1px solid var(--rule); padding-top: 20px; }
+  .hedge { border-bottom: 1px dashed var(--muted); }
+  code { font: 0.9em var(--mono); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">Explainer · TOPIC</div>
+    <h1>TOPIC</h1>
+    <p class="summary">One sentence that says what TOPIC is and why it matters.</p>
+  </header>
+
+  <div class="short">
+    <h2>The short version</h2>
+    <ul>
+      <li>Core claim 1.</li>
+      <li>Core claim 2.</li>
+      <li>Core claim 3.</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="n">1</span>First step of the mechanism</h2>
+    <p>Two to four short STE sentences.</p>
+    <div class="figure">
+      <canvas id="fig1" width="720" height="360" aria-label="Describe the figure"></canvas>
+      <div class="controls">
+        <label>parameter <input id="p1" type="range" min="0" max="1" step="0.01" value="0.5"><output id="p1v">0.50</output></label>
+        <button id="preset">Edge case</button>
+      </div>
+      <p class="caption" id="cap1" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="limits">
+    <h2>What this does not show</h2>
+    <p>Limits, open questions and <span class="hedge">hedged claims</span> from the source.</p>
+  </section>
+</main>
+<script>
+  // Sharp canvas at any devicePixelRatio. Returns a 2D context in CSS pixels.
+  function setupCanvas(canvas) {
+    const ratio = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = w * canvas.height / canvas.width;
+    canvas.style.height = h + "px";
+    canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return { ctx, w, h };
+  }
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const fig1 = document.getElementById("fig1");
+  const p1 = document.getElementById("p1"), p1v = document.getElementById("p1v");
+  const cap1 = document.getElementById("cap1");
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(fig1);
+    const p = parseFloat(p1.value);
+    p1v.textContent = p.toFixed(2);
+    ctx.clearRect(0, 0, w, h);
+    // Replace with the real computation. Draw what the parameter changes.
+    ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const y = h / 2 - Math.sin(x / w * Math.PI * 4) * p * h * 0.4;
+      x ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+    cap1.textContent = `At ${p.toFixed(2)}, the curve shows … (one STE sentence about what the reader sees).`;
+  }
+  p1.addEventListener("input", draw);
+  document.getElementById("preset").addEventListener("click", () => { p1.value = 1; draw(); });
+  window.addEventListener("resize", draw);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  draw();
+</script>
+</body>
+</html>
