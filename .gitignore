@@ -8,3 +8,6 @@ media/
 audio/
 *.mp4
 *.wav
+# keep the published example video (served by GitHub Pages)
+!examples/how-it-works/video/*.mp4
+examples/**/frames.py

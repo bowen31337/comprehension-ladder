@@ -1,0 +1,49 @@
+name: Deploy explainer to GitHub Pages
+
+# Publishes examples/how-it-works (the skill explaining itself) as a static site.
+# The interactive page (rung 3) becomes index.html. The diagram, video and
+# prose sit next to it at the same relative paths as in the repo.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/how-it-works/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp -R examples/how-it-works/. _site/
+          cp _site/how-it-works.html _site/index.html
+          # render sources are for the repo, not the site
+          rm -f _site/video/scene_frames.py
+          touch _site/.nojekyll
+          ls -la _site _site/video
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

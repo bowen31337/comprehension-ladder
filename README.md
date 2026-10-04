@@ -64,13 +64,18 @@ Read incident-note.md and make me a diagram of what happened.
 
 ### Example: the skill explaining itself
 
-[`examples/how-it-works/`](examples/how-it-works/) holds the skill's own output when it was asked to explain how it works. It climbed three rungs from one outline:
+**Live page: https://bowen31337.github.io/comprehension-ladder/**
+
+[`examples/how-it-works/`](examples/how-it-works/) holds the skill's own output when it was asked to explain how it works. It climbed all four rungs from one outline:
 
 | Rung | File |
 |---|---|
 | 1. STE prose (80%) | [`explanation.md`](examples/how-it-works/explanation.md) |
 | 2. Diagram | [`how-it-works.svg`](examples/how-it-works/how-it-works.svg) |
-| 3. Web page | [`how-it-works.html`](examples/how-it-works/how-it-works.html) — download and open it: a request router, a live strictness linter, the ladder, and the video-path switches |
+| 3. Web page | [`how-it-works.html`](examples/how-it-works/how-it-works.html), served live on [GitHub Pages](https://bowen31337.github.io/comprehension-ladder/): a request router, a live strictness linter, the ladder, and the video-path switches |
+| 4. Video | [`video/`](examples/how-it-works/video/): an 89-second narrated MP4 (14 beats), with its `narration.md` and `scene_frames.py`. Rendered with `frames.py` and macOS `say`, no installs |
+
+A GitHub Actions workflow ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)) republishes the page on every push that touches the example.
 
 ![How the skill works](examples/how-it-works/how-it-works.svg)
 
@@ -96,7 +101,7 @@ scripts/
 assets/
   html-explainer-template.html  # rung-3 starting point (light/dark, mobile-ready)
 examples/
-  how-it-works/                 # the skill explaining itself: rungs 1-3
+  how-it-works/                 # the skill explaining itself: all four rungs (live on Pages)
 evals/
   evals.json                    # test prompts used to benchmark the skill
   files/                        # eval fixtures (a retry diff, an incident note)
