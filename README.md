@@ -62,6 +62,18 @@ Read incident-note.md and make me a diagram of what happened.
 | 40–69 | ≤30-word sentences, no semicolons or marketing adjectives |
 | <40 | Advice only |
 
+### Example: the skill explaining itself
+
+[`examples/how-it-works/`](examples/how-it-works/) holds the skill's own output when it was asked to explain how it works. It climbed three rungs from one outline:
+
+| Rung | File |
+|---|---|
+| 1. STE prose (80%) | [`explanation.md`](examples/how-it-works/explanation.md) |
+| 2. Diagram | [`how-it-works.svg`](examples/how-it-works/how-it-works.svg) |
+| 3. Web page | [`how-it-works.html`](examples/how-it-works/how-it-works.html) — download and open it: a request router, a live strictness linter, the ladder, and the video-path switches |
+
+![How the skill works](examples/how-it-works/how-it-works.svg)
+
 ## Requirements
 
 - **Rungs 1–3:** [uv](https://docs.astral.sh/uv/) to run the linter (`uv run scripts/ste-lint.py --selftest`).
@@ -83,6 +95,8 @@ scripts/
   render_video.sh               # TTS → Manim or frames.py → ffmpeg
 assets/
   html-explainer-template.html  # rung-3 starting point (light/dark, mobile-ready)
+examples/
+  how-it-works/                 # the skill explaining itself: rungs 1-3
 evals/
   evals.json                    # test prompts used to benchmark the skill
   files/                        # eval fixtures (a retry diff, an incident note)

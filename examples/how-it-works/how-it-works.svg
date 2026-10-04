@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+  <title>Comprehension Ladder: how the skill works</title>
+  <desc>One-page overview sheet of the comprehension-ladder skill. It shows the four output rungs and the request flow from prompt to reply. It also shows one outline in four forms, the two rules that protect meaning, the video path, the strictness bands and the limits.</desc>
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1d1d1f"/></marker>
+    <marker id="blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fbf"/></marker>
+    <marker id="red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+    <style>
+      .t { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; font-size: 14px; fill: #1d1d1f; letter-spacing: .04em; }
+      .l { font-size: 12px; fill: #1d1d1f; }
+      .s { font-size: 11px; fill: #6e6e73; }
+      .b { font-size: 12px; fill: #1f5fbf; }
+      .r { font-size: 12px; fill: #c0392b; }
+      .box { fill: #fff; stroke: #1d1d1f; stroke-width: 1; }
+      .panel { fill: #fff; stroke: #c7c7cc; stroke-width: 1; }
+      .tab { fill: #1d1d1f; }
+      .tabt { fill: #fff; font-size: 14px; font-weight: 700; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1100" fill="#fbfaf7"/>
+  <rect x="20" y="20" width="1560" height="1060" fill="none" stroke="#1d1d1f" stroke-width="1.5"/>
+  <!-- grid reference -->
+  <g font-size="11" fill="#6e6e73" text-anchor="middle">
+    <text x="117" y="15">1</text><text x="312" y="15">2</text><text x="507" y="15">3</text><text x="702" y="15">4</text>
+    <text x="897" y="15">5</text><text x="1092" y="15">6</text><text x="1287" y="15">7</text><text x="1482" y="15">8</text>
+    <text x="117" y="1094">1</text><text x="312" y="1094">2</text><text x="507" y="1094">3</text><text x="702" y="1094">4</text>
+    <text x="897" y="1094">5</text><text x="1092" y="1094">6</text><text x="1287" y="1094">7</text><text x="1482" y="1094">8</text>
+    <text x="10" y="155">A</text><text x="10" y="420">B</text><text x="10" y="685">C</text><text x="10" y="950">D</text>
+    <text x="1590" y="155">A</text><text x="1590" y="420">B</text><text x="1590" y="685">C</text><text x="1590" y="950">D</text>
+  </g>
+
+  <!-- ============ PANEL A: the four rungs ============ -->
+  <g transform="translate(40,40)">
+    <rect class="panel" width="420" height="440"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">A</text>
+    <text class="t" x="40" y="19">THE FOUR RUNGS</text>
+    <!-- rails -->
+    <line x1="60" y1="70" x2="60" y2="400" stroke="#1d1d1f" stroke-width="2"/>
+    <line x1="360" y1="70" x2="360" y2="400" stroke="#1d1d1f" stroke-width="2"/>
+    <!-- rungs, 4 at top -->
+    <g>
+      <line x1="60" y1="100" x2="360" y2="100" stroke="#1d1d1f" stroke-width="2"/>
+      <text class="l" x="70" y="92" font-weight="700">4  VIDEO</text><text class="s" x="200" y="92">narrated MP4</text>
+      <text class="s" x="70" y="118">topics that change over time</text>
+    </g>
+    <g>
+      <line x1="60" y1="190" x2="360" y2="190" stroke="#1d1d1f" stroke-width="2"/>
+      <text class="l" x="70" y="182" font-weight="700">3  WEB PAGE</text><text class="s" x="200" y="182">one interactive HTML</text>
+      <text class="s" x="70" y="208">a parameter you can move</text>
+    </g>
+    <g>
+      <line x1="60" y1="280" x2="360" y2="280" stroke="#1d1d1f" stroke-width="2"/>
+      <text class="l" x="70" y="272" font-weight="700">2  DIAGRAM</text><text class="s" x="200" y="272">one SVG sheet</text>
+      <text class="s" x="70" y="298">structure, flows, incidents</text>
+    </g>
+    <g>
+      <line x1="60" y1="370" x2="360" y2="370" stroke="#1f5fbf" stroke-width="3"/>
+      <text class="b" x="70" y="362" font-weight="700">1  STE PROSE</text><text class="s" x="200" y="362">Markdown, 80% STE</text>
+      <text class="s" x="70" y="388">short explanations, diffs</text>
+    </g>
+    <!-- climb arrow -->
+    <line x1="390" y1="380" x2="390" y2="90" stroke="#1f5fbf" stroke-width="1.5" marker-end="url(#blue)"/>
+    <text class="b" x="398" y="240" transform="rotate(90 398 240)" text-anchor="middle">climb: same facts</text>
+    <text class="s" x="20" y="428">Each rung is usually easier to absorb (Karpathy).</text>
+  </g>
+
+  <!-- ============ PANEL B: request flow ============ -->
+  <g transform="translate(480,40)">
+    <rect class="panel" width="1080" height="440"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">B</text>
+    <text class="t" x="40" y="19">WHAT HAPPENS WHEN YOU ASK</text>
+    <text class="s" x="1060" y="19" text-anchor="end">solid = always · dashed = possible</text>
+
+    <!-- row 1 -->
+    <g>
+      <rect class="box" x="30" y="70" width="200" height="70"/>
+      <text class="l" x="130" y="98" text-anchor="middle" font-weight="700">1 your request</text>
+      <text class="s" x="130" y="120" text-anchor="middle">"now make it a diagram"</text>
+    </g>
+    <line x1="230" y1="105" x2="300" y2="105" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="265" y="96" text-anchor="middle">prompt</text>
+    <g>
+      <rect class="box" x="300" y="70" width="220" height="70"/>
+      <text class="l" x="410" y="98" text-anchor="middle" font-weight="700">2 description match</text>
+      <text class="s" x="410" y="120" text-anchor="middle">"help a person understand"</text>
+    </g>
+    <line x1="520" y1="105" x2="590" y2="105" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="555" y="96" text-anchor="middle">loads</text>
+    <g>
+      <rect class="box" x="590" y="70" width="220" height="70"/>
+      <text class="l" x="700" y="98" text-anchor="middle" font-weight="700">3 pick rung</text>
+      <text class="s" x="700" y="120" text-anchor="middle">+ strictness (default 80)</text>
+    </g>
+    <line x1="810" y1="105" x2="880" y2="105" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="845" y="96" text-anchor="middle">rung, %</text>
+    <g>
+      <rect class="box" x="880" y="70" width="170" height="70" stroke="#1f5fbf" stroke-width="2"/>
+      <text class="b" x="965" y="98" text-anchor="middle" font-weight="700">4 write outline</text>
+      <text class="s" x="965" y="120" text-anchor="middle">see panel C</text>
+    </g>
+
+    <!-- dashed miss branch from step 2 -->
+    <path d="M410,140 L410,190" fill="none" stroke="#c0392b" stroke-dasharray="5 4" marker-end="url(#red)"/>
+    <rect x="300" y="190" width="220" height="56" fill="#fff" stroke="#c0392b" stroke-dasharray="5 4"/>
+    <text class="r" x="410" y="212" text-anchor="middle">plain "explain X":</text>
+    <text class="r" x="410" y="232" text-anchor="middle">may answer directly</text>
+
+    <!-- snake down to row 2 -->
+    <path d="M965,140 L965,300 L870,300" fill="none" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="975" y="225">outline</text>
+
+    <!-- row 2, right to left -->
+    <g>
+      <rect class="box" x="650" y="265" width="220" height="70"/>
+      <text class="l" x="760" y="293" text-anchor="middle" font-weight="700">5 render the rung</text>
+      <text class="s" x="760" y="315" text-anchor="middle">rules in references/*.md</text>
+    </g>
+    <line x1="650" y1="300" x2="580" y2="300" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="615" y="291" text-anchor="middle">artifact</text>
+    <g>
+      <rect class="box" x="340" y="265" width="240" height="70"/>
+      <text class="l" x="460" y="293" text-anchor="middle" font-weight="700">6 lint + look</text>
+      <text class="s" x="460" y="315" text-anchor="middle">ste-lint.py --strictness 80</text>
+    </g>
+    <line x1="340" y1="300" x2="270" y2="300" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="305" y="291" text-anchor="middle">checked</text>
+    <g>
+      <rect class="box" x="30" y="265" width="240" height="70"/>
+      <text class="l" x="150" y="293" text-anchor="middle" font-weight="700">7 reply</text>
+      <text class="s" x="150" y="315" text-anchor="middle">artifact + one "Next:" line</text>
+    </g>
+    <!-- loop back: next rung -->
+    <path d="M150,335 L150,395 L965,395 L965,345" fill="none" stroke="#1f5fbf" stroke-dasharray="6 4"/>
+    <text class="b" x="560" y="387" text-anchor="middle">you pick the next rung · same outline, new form</text>
+    <text class="s" x="30" y="425">The linter reads Markdown, SVG text and HTML captions. Hedges are never flagged.</text>
+  </g>
+
+  <!-- ============ PANEL C: one outline, four renders ============ -->
+  <g transform="translate(40,500)">
+    <rect class="panel" width="520" height="290"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">C</text>
+    <text class="t" x="40" y="19">ONE OUTLINE, FOUR FORMS</text>
+    <rect class="box" x="24" y="60" width="200" height="190" stroke="#1f5fbf" stroke-width="2"/>
+    <text class="b" x="124" y="84" text-anchor="middle" font-weight="700">OUTLINE</text>
+    <text class="l" x="40" y="114">1 core claims</text>
+    <text class="l" x="40" y="142">2 mechanism, in order</text>
+    <text class="l" x="40" y="170">3 every hedge</text>
+    <text class="l" x="40" y="198">4 one real example</text>
+    <text class="s" x="40" y="232">kept in reasoning</text>
+    <g fill="none" stroke="#1d1d1f">
+      <path d="M224,155 C280,155 280,80 340,80" marker-end="url(#ink)"/>
+      <path d="M224,155 C280,155 280,135 340,135" marker-end="url(#ink)"/>
+      <path d="M224,155 C280,155 280,190 340,190" marker-end="url(#ink)"/>
+      <path d="M224,155 C280,155 280,245 340,245" marker-end="url(#ink)"/>
+    </g>
+    <text class="s" x="236" y="62">same facts</text>
+    <g>
+      <rect class="box" x="340" y="62" width="160" height="36"/><text class="l" x="420" y="85" text-anchor="middle">1 STE prose</text>
+      <rect class="box" x="340" y="117" width="160" height="36"/><text class="l" x="420" y="140" text-anchor="middle">2 diagram</text>
+      <rect class="box" x="340" y="172" width="160" height="36"/><text class="l" x="420" y="195" text-anchor="middle">3 web page</text>
+      <rect class="box" x="340" y="227" width="160" height="36"/><text class="l" x="420" y="250" text-anchor="middle">4 video</text>
+    </g>
+    <text class="s" x="24" y="278">Only the form changes when you climb.</text>
+  </g>
+
+  <!-- ============ PANEL D: rules that protect meaning ============ -->
+  <g transform="translate(580,500)">
+    <rect class="panel" width="480" height="290"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">D</text>
+    <text class="t" x="40" y="19">TWO RULES THAT PROTECT MEANING</text>
+
+    <text class="l" x="24" y="62" font-weight="700">KEEP EVERY HEDGE</text>
+    <text class="s" x="24" y="84">source (test incident note):</text>
+    <text class="l" x="24" y="104">"may be caused by a race condition"</text>
+    <line x1="40" y1="134" x2="260" y2="134" stroke="#c0392b" stroke-dasharray="6 4" marker-end="url(#red)"/>
+    <text class="r" x="270" y="138">may be</text>
+    <text class="s" x="24" y="158">dashed line + "may be"</text>
+    <text class="s" x="270" y="158">never "is caused by"</text>
+
+    <line x1="24" y1="178" x2="456" y2="178" stroke="#e5e5ea"/>
+
+    <text class="l" x="24" y="204" font-weight="700">ADD NO FACTS</text>
+    <text class="s" x="24" y="226">source (test diff): gives no reason</text>
+    <text class="l" x="24" y="248">"The diff does not say why."</text>
+    <text class="s" x="24" y="274">made-up numbers get "example value"</text>
+  </g>
+
+  <!-- ============ PANEL E: video path ============ -->
+  <g transform="translate(1080,500)">
+    <rect class="panel" width="480" height="290"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">E</text>
+    <text class="t" x="40" y="19">RUNG 4: THE VIDEO PATH</text>
+
+    <text class="s" x="24" y="56">narration.md → one audio file per beat</text>
+    <!-- voice chain -->
+    <text class="l" x="24" y="84" font-weight="700">VOICE (first found)</text>
+    <g font-size="11">
+      <rect class="box" x="24" y="94" width="96" height="28"/><text class="l" x="72" y="113" text-anchor="middle">ElevenLabs</text>
+      <rect class="box" x="134" y="94" width="72" height="28"/><text class="l" x="170" y="113" text-anchor="middle">Piper</text>
+      <rect class="box" x="220" y="94" width="96" height="28"/><text class="l" x="268" y="113" text-anchor="middle">TTS_CMD</text>
+      <rect class="box" x="330" y="94" width="96" height="28"/><text class="l" x="378" y="113" text-anchor="middle">macOS say</text>
+    </g>
+    <g stroke="#6e6e73" fill="none">
+      <line x1="120" y1="108" x2="132" y2="108" marker-end="url(#ink)"/>
+      <line x1="206" y1="108" x2="218" y2="108" marker-end="url(#ink)"/>
+      <line x1="316" y1="108" x2="328" y2="108" marker-end="url(#ink)"/>
+    </g>
+
+    <!-- renderer decision -->
+    <text class="l" x="24" y="154" font-weight="700">RENDERER</text>
+    <polygon points="110,168 180,198 110,228 40,198" fill="#fff" stroke="#1d1d1f"/>
+    <text class="l" x="110" y="196" text-anchor="middle">manim</text>
+    <text class="l" x="110" y="211" text-anchor="middle">installed?</text>
+    <line x1="180" y1="186" x2="250" y2="176" stroke="#1d1d1f" marker-end="url(#ink)"/>
+    <text class="s" x="206" y="172">yes</text>
+    <rect class="box" x="250" y="160" width="190" height="30"/><text class="l" x="345" y="180" text-anchor="middle">scene.py (Manim)</text>
+    <line x1="180" y1="210" x2="250" y2="222" stroke="#1f5fbf" marker-end="url(#blue)"/>
+    <text class="b" x="206" y="232">no</text>
+    <rect class="box" x="250" y="208" width="190" height="30" stroke="#1f5fbf" stroke-width="2"/><text class="b" x="345" y="228" text-anchor="middle">frames.py via uv run</text>
+    <text class="s" x="24" y="262">audio + frames → ffmpeg → narrated MP4</text>
+    <text class="s" x="24" y="280">test run: 1:43 Fourier video, no installs</text>
+  </g>
+
+  <!-- ============ PANEL F: strictness bands ============ -->
+  <g transform="translate(40,810)">
+    <rect class="panel" width="520" height="250"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">F</text>
+    <text class="t" x="40" y="19">STRICTNESS: SENTENCE CAP</text>
+    <!-- scale 0..40 words over 300px, x0=150 -->
+    <g>
+      <text class="l" x="24" y="72">90–100%</text>
+      <rect x="150" y="60" width="150" height="16" fill="#e8eef9" stroke="#1d1d1f"/><text class="l" x="310" y="73">20 words</text>
+      <text class="b" x="24" y="112" font-weight="700">70–89%</text>
+      <rect x="150" y="100" width="187.5" height="16" fill="#1f5fbf"/><text class="b" x="347" y="113" font-weight="700">25 · default 80</text>
+      <text class="l" x="24" y="152">40–69%</text>
+      <rect x="150" y="140" width="225" height="16" fill="#e8eef9" stroke="#1d1d1f"/><text class="l" x="385" y="153">30 words</text>
+      <text class="l" x="24" y="192">0–39%</text>
+      <rect x="150" y="180" width="262.5" height="16" fill="#f2f2f4" stroke="#6e6e73" stroke-dasharray="4 3"/><text class="s" x="422" y="193">35 · advice</text>
+    </g>
+    <line x1="150" y1="206" x2="450" y2="206" stroke="#6e6e73"/>
+    <g class="s" text-anchor="middle"><text x="150" y="222">0</text><text x="225" y="222">10</text><text x="300" y="222">20</text><text x="375" y="222">30</text><text x="450" y="222">40</text></g>
+    <text class="s" x="24" y="242">Higher bands also ban more patterns (see SKILL.md).</text>
+  </g>
+
+  <!-- ============ PANEL G: notes ============ -->
+  <g transform="translate(580,810)">
+    <rect class="panel" width="580" height="250"/>
+    <rect class="tab" width="28" height="28"/><text class="tabt" x="14" y="19">G</text>
+    <text class="t" x="40" y="19">NOTES AND LIMITS</text>
+    <text class="l" x="24" y="60">STE = Simplified Technical English.</text>
+    <text class="l" x="24" y="80">It came from aircraft maintenance manuals.</text>
+    <text class="l" x="24" y="110">The linter checks form only.</text>
+    <text class="l" x="24" y="130">It cannot tell if an explanation is true.</text>
+    <text class="l" x="24" y="160">The official STE dictionary is not included.</text>
+    <text class="l" x="24" y="180">Word choice is a direction, not a checked rule.</text>
+    <text class="l" x="24" y="210">Text for agents to read: use asd-ste100.</text>
+    <text class="s" x="24" y="236">Captions built from many code pieces can skip the lint.</text>
+  </g>
+
+  <!-- ============ title block ============ -->
+  <g transform="translate(1180,810)">
+    <rect width="380" height="250" fill="#fff" stroke="#1d1d1f"/>
+    <text x="16" y="34" font-size="18" font-weight="700" font-family="system-ui, -apple-system, sans-serif" fill="#1d1d1f">Comprehension Ladder</text>
+    <text x="16" y="56" font-size="13" font-family="system-ui, -apple-system, sans-serif" fill="#1d1d1f">How the skill works</text>
+    <line x1="0" y1="74" x2="380" y2="74" stroke="#1d1d1f"/>
+    <text class="l" x="16" y="100">Subject: a Claude Code skill</text>
+    <text class="l" x="16" y="122">Idea: Karpathy, 2 Oct 2026</text>
+    <text class="l" x="16" y="144">STE rules: asd-ste100-skill (MIT)</text>
+    <text class="l" x="16" y="166">Repo: bowen31337/comprehension-ladder</text>
+    <line x1="0" y1="184" x2="380" y2="184" stroke="#1d1d1f"/>
+    <text class="l" x="16" y="210">Strictness: 80% STE</text>
+    <text class="l" x="16" y="232">Rung 2 of 4 · Sheet 1 of 1</text>
+  </g>
+</svg>

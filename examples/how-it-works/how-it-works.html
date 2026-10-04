@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprehension Ladder</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --panel: #ffffff; --ink: #1d1d1f; --muted: #6e6e73; --rule: #d9d6cf;
+    --accent: #1f5fbf; --accent-soft: #e8eef9; --warn: #c0392b; --warn-soft: #fbeaea; --good: #2e7d32; --good-soft: #e7f3e8;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141416; --panel: #1c1c1f; --ink: #ececf0; --muted: #9a9aa2; --rule: #34343a;
+      --accent: #6aa2ff; --accent-soft: #1d2a40; --warn: #ff7a6b; --warn-soft: #3a2220; --good: #6fcf73; --good-soft: #1e3320;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141416; --panel: #1c1c1f; --ink: #ececf0; --muted: #9a9aa2; --rule: #34343a;
+    --accent: #6aa2ff; --accent-soft: #1d2a40; --warn: #ff7a6b; --warn-soft: #3a2220; --good: #6fcf73; --good-soft: #1e3320;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--sans); }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px 80px; }
+  header .kicker { font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.15; margin: 6px 0 10px; }
+  .summary { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
+  .short { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 6px; }
+  .short h2 { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 6px; color: var(--muted); }
+  .short ul { margin: 0; padding-left: 20px; }
+  section { margin-top: 48px; }
+  section > h2 { font-size: 22px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+  section > h2 .n { font: 600 13px var(--mono); background: var(--ink); color: var(--bg); padding: 2px 7px; border-radius: 3px; }
+  .figure { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; margin: 16px 0; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font: 14px var(--mono); }
+  .controls label { display: flex; gap: 8px; align-items: center; }
+  input[type=range] { width: min(320px, 70vw); accent-color: var(--accent); }
+  output { color: var(--accent); font: 600 15px var(--mono); min-width: 4ch; }
+  button, .chip { font: 13px var(--mono); padding: 6px 11px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 5px; cursor: pointer; }
+  button:hover, button:focus-visible, .chip:hover { border-color: var(--accent); outline: none; }
+  button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  input[type=text], textarea { width: 100%; font: 14px/1.5 var(--mono); padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  textarea { min-height: 120px; resize: vertical; }
+  .caption { font-size: 15px; color: var(--muted); margin-top: 12px; min-height: 1.6em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .result { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+  .cell { border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+  .cell .k { font: 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .cell .v { font: 600 16px var(--mono); margin-top: 2px; }
+  .cell.hot { border-color: var(--accent); background: var(--accent-soft); }
+  .cell.maybe { border-style: dashed; border-color: var(--warn); }
+  .lintview { font: 14px/1.7 var(--mono); white-space: pre-wrap; background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; margin-top: 12px; }
+  mark.hard { background: var(--warn-soft); color: var(--warn); border-bottom: 2px solid var(--warn); }
+  mark.adv { background: transparent; color: inherit; border-bottom: 2px dashed var(--muted); }
+  mark.hedge { background: var(--good-soft); color: var(--good); }
+  .findings { list-style: none; padding: 0; margin: 10px 0 0; font: 13px var(--mono); }
+  .findings li { padding: 4px 0; border-bottom: 1px solid var(--rule); }
+  .tag { display: inline-block; font: 600 11px var(--mono); padding: 1px 6px; border-radius: 3px; margin-right: 8px; }
+  .tag.hard { background: var(--warn); color: #fff; }
+  .tag.adv { border: 1px solid var(--muted); color: var(--muted); }
+  .rungs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ladder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 14px; margin-top: 14px; }
+  @media (max-width: 640px) { .ladder { grid-template-columns: 1fr; } }
+  .outline { border: 2px solid var(--accent); border-radius: 6px; padding: 10px 12px; font-size: 14px; }
+  .outline h3 { margin: 0 0 6px; font: 600 12px var(--mono); color: var(--accent); letter-spacing: .06em; }
+  .outline ol { margin: 0; padding-left: 18px; }
+  .outline li.hedge { color: var(--good); }
+  .render { border: 1px solid var(--rule); border-radius: 6px; padding: 12px; min-height: 230px; background: var(--bg); font-size: 15px; }
+  .render svg { width: 100%; height: auto; display: block; }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .frame { background: #0e1116; color: #ece9e1; border-radius: 4px; padding: 8px; font: 12px var(--mono); min-height: 110px; }
+  .frame b { color: #f4d35e; font-weight: 600; }
+  .switches { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 14px; font: 14px var(--mono); }
+  .switches label { display: flex; gap: 8px; align-items: center; }
+  .pipe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; font: 13px var(--mono); }
+  .pipe .st { border: 1px solid var(--rule); border-radius: 5px; padding: 6px 10px; background: var(--bg); }
+  .pipe .st.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .pipe .st.off { color: var(--muted); text-decoration: line-through; }
+  .pipe .ar { color: var(--muted); }
+  .limits { border-top: 1px solid var(--rule); padding-top: 20px; }
+  .hedgeword { border-bottom: 1px dashed var(--muted); }
+  code { font: 0.9em var(--mono); }
+  .note { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">Explainer · comprehension-ladder skill · rung 3 of 4</div>
+    <h1>How the comprehension ladder works</h1>
+    <p class="summary">The skill takes one thing you want to understand and shows it in one of four formats. Each format shows the same facts.</p>
+  </header>
+
+  <div class="short">
+    <h2>The short version</h2>
+    <ul>
+      <li>There are four rungs: STE prose, a diagram, an interactive page and a narrated video.</li>
+      <li>The skill picks a rung and a strictness from your words. The default strictness is 80%.</li>
+      <li>It writes one outline first. All four rungs show that one outline.</li>
+      <li>It keeps every hedge and adds no facts.</li>
+      <li>A linter checks the form of the text. The video works without Manim.</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2><span class="n">1</span>From your words to a rung</h2>
+    <p>The skill reads your request for format words and a strictness. Type a request, or pick one below.</p>
+    <div class="figure">
+      <input type="text" id="req" value="Explain how attention works, 80% of the way to ASD-STE100." aria-label="Your request">
+      <div class="chips" id="reqChips"></div>
+      <div class="result">
+        <div class="cell" id="cLoad"><div class="k">skill loads?</div><div class="v" id="vLoad"></div></div>
+        <div class="cell hot"><div class="k">rung</div><div class="v" id="vRung"></div></div>
+        <div class="cell hot"><div class="k">strictness</div><div class="v" id="vPct"></div></div>
+        <div class="cell"><div class="k">sentence cap</div><div class="v" id="vCap"></div></div>
+      </div>
+      <p class="caption" id="cap1" aria-live="polite"></p>
+      <p class="note">This page uses the rules in SKILL.md. The real decision to load the skill is a model judgment, so the first box is a rough guide only.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span>Strictness and the linter</h2>
+    <p>Strictness is a percent. It sets how close the prose is to full STE (Simplified Technical English). Move the slider. The page runs the same rules as <code>ste-lint.py</code> on the text below.</p>
+    <div class="figure">
+      <div class="controls">
+        <label>strictness <input id="pct" type="range" min="0" max="100" step="5" value="80"><output id="pctv">80%</output></label>
+      </div>
+      <div class="chips">
+        <button class="chip" data-sample="src">source paragraph</button>
+        <button class="chip" data-sample="r80">80% rewrite</button>
+        <button class="chip" data-sample="hype">marketing blurb</button>
+      </div>
+      <textarea id="txt" aria-label="Text to lint"></textarea>
+      <div class="lintview" id="lintview"></div>
+      <ul class="findings" id="findings"></ul>
+      <p class="caption" id="cap2" aria-live="polite"></p>
+      <p class="note">Red = hard finding (it fails the lint). Dashed = advice only. Green = a hedge. The linter never flags a hedge, because confidence is content.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span>One outline, four forms</h2>
+    <p>Before it makes anything, the skill writes an outline: core claims, the mechanism, every hedge and one real example. Pick a rung. The outline stays the same. Only the form changes.</p>
+    <div class="figure">
+      <div class="rungs" id="rungBtns"></div>
+      <div class="ladder">
+        <div class="outline">
+          <h3>OUTLINE · retry.diff (test input)</h3>
+          <ol>
+            <li>Attempts go from 3 to 5.</li>
+            <li>The wait is random. Its cap doubles from 0.5 s to 8 s.</li>
+            <li>The client now also retries 429 and connection errors.</li>
+            <li class="hedge">The test fixture <span class="hedgeword">probably</span> replaces <code>time.sleep</code>.</li>
+            <li class="hedge">The diff does not say why.</li>
+          </ol>
+        </div>
+        <div class="render" id="render" aria-live="polite"></div>
+      </div>
+      <p class="caption" id="cap3" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">4</span>The video path</h2>
+    <p>A video needs a renderer, a voice and ffmpeg. The render script uses the first tool it finds. Set what your machine has.</p>
+    <div class="figure">
+      <div class="switches">
+        <label><input type="checkbox" id="sUv" checked> uv</label>
+        <label><input type="checkbox" id="sFf" checked> ffmpeg</label>
+        <label><input type="checkbox" id="sManim"> manim</label>
+        <label><input type="checkbox" id="sEleven"> ELEVENLABS_API_KEY</label>
+        <label><input type="checkbox" id="sPiper"> piper + PIPER_MODEL</label>
+        <label><input type="checkbox" id="sCmd"> TTS_CMD</label>
+        <label><input type="checkbox" id="sSay" checked> macOS say</label>
+      </div>
+      <div class="pipe" id="pipeVoice"></div>
+      <div class="pipe" id="pipeRender"></div>
+      <p class="caption" id="cap4" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="limits">
+    <h2>What this does not show</h2>
+    <ul>
+      <li>The linter checks form only. It cannot tell if an explanation is true. The outline and the two rules do that job.</li>
+      <li>The skill does not include the official STE dictionary, because ASD does not permit others to copy it. Word choice is a direction, not a checked rule.</li>
+      <li>A plain "explain X" <span class="hedgeword">may</span> not load the skill. Claude often answers that kind of request directly.</li>
+      <li>Text for other agents to read is the job of the asd-ste100 skill, not this one.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+
+  // ---------- strictness bands (same as ste-lint.py STRICTNESS) ----------
+  const BANDS = [
+    [90, 20, ["semicolon", "phrasal-verb", "marketing-adjective", "nominalization", "long-sentence", "synonym-rotation", "passive-voice"]],
+    [70, 25, ["semicolon", "phrasal-verb", "marketing-adjective", "nominalization", "long-sentence"]],
+    [40, 30, ["semicolon", "long-sentence", "marketing-adjective"]],
+    [0, 35, []],
+  ];
+  const band = p => BANDS.find(b => p >= b[0]);
+
+  // ---------- section 1: request router ----------
+  const REQS = [
+    "Explain how attention works, 80% of the way to ASD-STE100.",
+    "Explain this git diff to me: retry.diff",
+    "Diagram how the OAuth2 code flow works.",
+    "Make an interactive HTML explainer of gradient descent.",
+    "Create a 3b1b style video on the Fourier transform.",
+    "explain kv cache",
+    "Rewrite this tool description so an agent cannot misread it.",
+  ];
+  const RUNG_NAMES = { 1: "1 · STE prose", 2: "2 · diagram", 3: "3 · web page", 4: "4 · video" };
+  function route(q) {
+    const t = q.toLowerCase();
+    if (/agent|tool description|error (message|string)|prompt/.test(t) && /rewrite|misread|unambiguous/.test(t))
+      return { load: "no", why: "This text is for an agent to read. The asd-ste100 skill does that job." };
+    let rung = null;
+    if (/video|3b1b|3blue1brown|manim|animation/.test(t)) rung = 4;
+    else if (/html|web ?page|interactive|explorable/.test(t)) rung = 3;
+    else if (/diagram|draw|visual|chart|one-pager/.test(t)) rung = 2;
+    else if (/\bste\b|ste100|simplified technical|\bdiff\b|\bplain\b/.test(t)) rung = 1;
+    let pct = 80, src = "the default";
+    const m = t.match(/(\d{1,3})\s*%/);
+    if (m) { pct = Math.min(100, +m[1]); src = "your number"; }
+    else if (/full (ste|strict)|strict ste|full strictness/.test(t)) { pct = 100; src = "\"full\""; }
+    else if (/light ste|plain english|a bit simpler/.test(t)) { pct = 50; src = "\"light\""; }
+    const strong = rung !== null || /understand|don.t get|what .* mean/.test(t);
+    const chosen = rung || 1;
+    return {
+      load: strong ? "likely" : "maybe",
+      rung: chosen, pct, src,
+      why: rung ? `You named the format, so the skill uses rung ${chosen}.`
+                : "You named no format. The skill picks rung 1 for a short explanation, and says so in one line.",
+    };
+  }
+  function showRoute() {
+    const r = route($("req").value);
+    $("vLoad").textContent = r.load;
+    $("cLoad").className = "cell" + (r.load === "maybe" ? " maybe" : "");
+    if (r.load === "no") {
+      $("vRung").textContent = "none"; $("vPct").textContent = "none"; $("vCap").textContent = "none";
+      $("cap1").textContent = r.why;
+      return;
+    }
+    $("vRung").textContent = RUNG_NAMES[r.rung];
+    $("vPct").textContent = r.pct + "%";
+    $("vCap").textContent = band(r.pct)[1] + " words";
+    const loadNote = r.load === "maybe" ? " This request may get a direct answer instead of the skill." : "";
+    $("cap1").textContent = `${r.why} The strictness comes from ${r.src}.${loadNote}`;
+  }
+  REQS.forEach(q => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.textContent = q.length > 34 ? q.slice(0, 32) + "…" : q; b.title = q;
+    b.addEventListener("click", () => { $("req").value = q; showRoute(); });
+    $("reqChips").appendChild(b);
+  });
+  $("req").addEventListener("input", showRoute);
+
+  // ---------- section 2: live linter (port of ste-lint.py rules) ----------
+  const RULES = [
+    ["semicolon", /;/g],
+    ["phrasal-verb", /\b(spin(?:ning|s)? up|spun up|reach(?:ing|es|ed)? out|div(?:e|es|ing|ed) into|dove into|kick(?:ing|s|ed)? off|circl(?:e|es|ing|ed) back|touch(?:ing|es|ed)? base)\b/gi],
+    ["marketing-adjective", /\b(seamless(?:ly)?|robust(?:ly)?|cutting-edge|effortless(?:ly)?|blazing[- ]fast|world-class|state-of-the-art|game-chang(?:ing|er))\b/gi],
+    ["nominalization", /\b(perform|performs|performed|conduct|conducts|conducted|carry out|carries out|carried out)\s+(?:a|an|the)\s+\w+(?:tion|sion|ment|ance|ence|ysis)\b/gi],
+    ["passive-voice", /\b(is|are|was|were|been|being)\s+(\w+ed|given|taken|made|done|found|seen|known|shown|written|built|sent|set|run|read|kept|held|left|put)\b/gi],
+    ["present-perfect", /(?<!\bmay )(?<!\bmight )(?<!\bcould )(?<!\bshould )(?<!\bwould )(?<!\bmust )\b(has|have|had)\s+(?:been\s+)?\w+(?:ed|en)\b/gi],
+  ];
+  const HEDGE = /\b(may|might|could|can|probably|likely|possibly|not known)\b/gi;
+  const SYN = [["check", "verify", "confirm", "validate"], ["start", "launch", "begin", "initiate"], ["use", "utilize", "employ"], ["show", "display"], ["change", "modify", "alter"]];
+  const SAMPLES = {
+    src: "The garbage collector, which has been redesigned in this release, now leverages a concurrent marking phase; consequently, pause times — previously a significant pain point for latency-sensitive services — may be substantially reduced, although throughput could regress slightly under heavy allocation.",
+    r80: "This release redesigns the garbage collector. It now marks live objects while the program keeps running, so pause times may become much shorter. That helps latency-sensitive services, where pauses were a known pain point. The cost: under heavy allocation, throughput could drop slightly.",
+    hype: "Our seamless, blazing-fast cache lets you spin up a robust cluster in seconds. We perform an analysis of every request. Verify the config first, then check the logs.",
+  };
+
+  function lintText(text, pct) {
+    const [, cap, hard] = band(pct);
+    const found = [];
+    for (const [rule, re] of RULES) {
+      re.lastIndex = 0;
+      for (const m of text.matchAll(re)) found.push({ rule, start: m.index, end: m.index + m[0].length, match: m[0] });
+    }
+    // long sentences
+    let pos = 0;
+    for (const s of text.split(/(?<=[.!?])\s+/)) {
+      const at = text.indexOf(s, pos); pos = at + s.length;
+      const n = s.split(/\s+/).filter(Boolean).length;
+      if (n > cap) found.push({ rule: "long-sentence", start: at, end: at + s.length, match: `${n} words`, whole: true });
+    }
+    // synonym rotation: flag later members of a group
+    for (const g of SYN) {
+      const hits = g.map(w => ({ w, m: new RegExp(`\\b${w}(?:s|es|ed|d|ing)?\\b`, "i").exec(text) })).filter(h => h.m).sort((a, b) => a.m.index - b.m.index);
+      hits.slice(1).forEach(h => found.push({ rule: "synonym-rotation", start: h.m.index, end: h.m.index + h.m[0].length, match: `${h.m[0]} vs ${hits[0].w}` }));
+    }
+    found.forEach(f => f.hard = hard.includes(f.rule));
+    return found.sort((a, b) => a.start - b.start);
+  }
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  function renderLint() {
+    const pct = +$("pct").value, text = $("txt").value;
+    $("pctv").textContent = pct + "%";
+    const found = lintText(text, pct);
+    // marks: word-level findings + hedges (sentence-level findings only go in the list)
+    const spans = found.filter(f => !f.whole).map(f => ({ ...f, cls: f.hard ? "hard" : "adv" }));
+    HEDGE.lastIndex = 0;
+    for (const m of text.matchAll(HEDGE)) spans.push({ start: m.index, end: m.index + m[0].length, cls: "hedge" });
+    spans.sort((a, b) => a.start - b.start);
+    let html = "", i = 0;
+    for (const s of spans) {
+      if (s.start < i) continue;
+      html += esc(text.slice(i, s.start)) + `<mark class="${s.cls}">${esc(text.slice(s.start, s.end))}</mark>`;
+      i = s.end;
+    }
+    $("lintview").innerHTML = html + esc(text.slice(i));
+    $("findings").innerHTML = found.map(f =>
+      `<li><span class="tag ${f.hard ? "hard" : "adv"}">${f.hard ? "HARD" : "advice"}</span>${f.rule}: ${esc(f.match)}</li>`).join("") ||
+      "<li>No findings.</li>";
+    const hardN = found.filter(f => f.hard).length, hedgeN = (text.match(HEDGE) || []).length;
+    const cap = band(pct)[1];
+    $("cap2").textContent = hardN === 0
+      ? `At ${pct}%, the sentence cap is ${cap} words and this text passes. The linter left all ${hedgeN} hedge words alone.`
+      : `At ${pct}%, the sentence cap is ${cap} words and this text has ${hardN} hard findings. The linter left all ${hedgeN} hedge words alone.`;
+  }
+  document.querySelectorAll("[data-sample]").forEach(b => b.addEventListener("click", () => { $("txt").value = SAMPLES[b.dataset.sample]; renderLint(); }));
+  $("pct").addEventListener("input", renderLint);
+  $("txt").addEventListener("input", renderLint);
+  $("txt").value = SAMPLES.src;
+
+  // ---------- section 3: one outline, four forms ----------
+  const capAt = a => Math.min(8, 0.5 * 2 ** a);
+  const RENDERS = {
+    1: () => `<p><b>This diff changes how <code>HttpClient.get</code> retries a failed request.</b></p>
+      <p>The client now makes 5 attempts, not 3. The wait between attempts is random. Its cap doubles each time, from 0.5 s to 8 s. The client also retries 429 responses and connection errors.</p>
+      <p>The new test fixture probably replaces <code>time.sleep</code>. The diff does not say why the authors made these changes.</p>`,
+    2: () => {
+      const bars = [0, 1, 2, 3, 4].map(a => `<rect x="${60 + a * 70}" y="${150 - capAt(a) * 15}" width="40" height="${capAt(a) * 15}" fill="var(--accent)"/>
+        <text x="${80 + a * 70}" y="168" font-size="11" text-anchor="middle" fill="var(--muted)">try ${a}</text>
+        <text x="${80 + a * 70}" y="${144 - capAt(a) * 15}" font-size="11" text-anchor="middle" fill="var(--ink)">${capAt(a)} s</text>`).join("");
+      return `<svg viewBox="0 0 420 230" font-family="ui-monospace, Menlo, monospace">
+        <text x="10" y="16" font-size="12" font-weight="700" fill="var(--ink)">A · WAIT CAP PER ATTEMPT</text>${bars}
+        <line x1="50" y1="150" x2="410" y2="150" stroke="var(--muted)"/>
+        <text x="10" y="196" font-size="11" fill="var(--ink)">B · retries on: 502 503 504 + 429 + connection error</text>
+        <rect x="10" y="206" width="250" height="20" fill="none" stroke="var(--warn)" stroke-dasharray="5 4"/>
+        <text x="16" y="220" font-size="11" fill="var(--warn)">why: not stated in the diff</text></svg>`;
+    },
+    3: () => `<p>Move the attempt number. The page computes the cap with the real formula.</p>
+      <label style="font:14px var(--mono)">attempt <input id="att" type="range" min="0" max="4" value="0" style="width:180px"> <output id="attv">0</output></label>
+      <p id="attcap" style="font:15px var(--mono);margin-top:10px"></p>
+      <p class="note">cap = min(8, 0.5 × 2^attempt). The wait is a random value between 0 and the cap.</p>`,
+    4: () => `<div class="board">
+      <div class="frame"><b>beat 1</b><br>Bars grow: 0.5, 1, 2, 4, 8 s.<br><br>"Each failure doubles the cap."</div>
+      <div class="frame"><b>beat 2</b><br>A dot jumps to a random point under the bar.<br><br>"The wait is a random value below the cap."</div>
+      <div class="frame"><b>beat 3</b><br>A dashed box: "why?"<br><br>"The diff does not say why."</div></div>
+      <p class="note">Storyboard only. The real rung renders an MP4 with narration.</p>`,
+  };
+  const RUNG_CAP = {
+    1: "Rung 1 states the outline as short STE sentences. The hedge and the missing reason stay in the text.",
+    2: "Rung 2 draws the same facts. The missing reason becomes a dashed box, not a guess.",
+    3: "Rung 3 lets you move one number and computes the result. The facts are the same as in rung 1.",
+    4: "Rung 4 tells the same outline as narrated beats. Each beat matches one animation step.",
+  };
+  function showRung(n) {
+    document.querySelectorAll("#rungBtns button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.r === n)));
+    $("render").innerHTML = RENDERS[n]();
+    $("cap3").textContent = RUNG_CAP[n];
+    if (n === 3) {
+      const upd = () => { const a = +$("att").value; $("attv").textContent = a; $("attcap").textContent = `Attempt ${a}: the wait is a random value from 0 to ${capAt(a)} s.`; };
+      $("att").addEventListener("input", upd); upd();
+    }
+  }
+  [1, 2, 3, 4].forEach(n => {
+    const b = document.createElement("button");
+    b.textContent = RUNG_NAMES[n]; b.dataset.r = n;
+    b.addEventListener("click", () => showRung(n));
+    $("rungBtns").appendChild(b);
+  });
+
+  // ---------- section 4: video path (same order as render_video.sh) ----------
+  function showVideo() {
+    const on = id => $(id).checked;
+    const voices = [["ElevenLabs", on("sEleven")], ["Piper", on("sPiper")], ["TTS_CMD", on("sCmd")], ["macOS say", on("sSay")]];
+    const voice = (voices.find(v => v[1]) || [null])[0];
+    const renderer = on("sManim") ? "Manim (scene.py)" : "frames.py via uv run";
+    const step = (txt, cls) => `<span class="st ${cls}">${txt}</span>`;
+    $("pipeVoice").innerHTML = "<span>voice:</span>" + voices.map(([n, ok]) => step(n, n === voice ? "on" : ok ? "" : "off")).join('<span class="ar">→</span>');
+    $("pipeRender").innerHTML = "<span>picture:</span>" + step("Manim", on("sManim") ? "on" : "off") + '<span class="ar">or</span>' +
+      step("frames.py", on("sManim") ? "" : "on") + '<span class="ar">→</span>' + step("ffmpeg", on("sFf") ? "on" : "off") +
+      '<span class="ar">→</span>' + step("MP4", on("sFf") && on("sUv") && voice ? "on" : "off");
+    let msg;
+    if (!on("sUv")) msg = "The script stops at once and prints the uv install command. No video.";
+    else if (!on("sFf")) msg = "The script stops and prints the ffmpeg install command. No video.";
+    else if (!voice) msg = "The script finds no voice. It stops and prints how to set ElevenLabs or Piper.";
+    else msg = `The script uses ${voice} for the voice and ${renderer} for the picture. Then ffmpeg makes the MP4.` +
+      (voice === "macOS say" ? " The reply says that Piper or ElevenLabs would sound better." : "");
+    $("cap4").textContent = msg;
+  }
+  ["sUv", "sFf", "sManim", "sEleven", "sPiper", "sCmd", "sSay"].forEach(id => $(id).addEventListener("change", showVideo));
+
+  showRoute(); renderLint(); showRung(1); showVideo();
+</script>
+</body>
+</html>
