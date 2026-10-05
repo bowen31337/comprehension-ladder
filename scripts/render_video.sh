@@ -98,6 +98,20 @@ for txt in "$AUDIO"/beat-*.txt; do
   esac
 done
 
+# --- one canonical format for every clip -------------------------------------
+# The concat demuxer below takes its stream format from the first file and reads
+# every later file as if it had that format. Engines differ (Piper voices are
+# often 22050 Hz, custom TTS_CMD output can be anything), so a 44100 Hz pause
+# after a 22050 Hz beat played as 0.8 s instead of 0.4 s and the voice drifted
+# behind the picture. Convert every beat, new or cached, to the format the pauses use.
+CANON="pcm_s16le,44100,1"
+for wav in "$AUDIO"/beat-*.wav; do
+  fmt="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of csv=p=0 "$wav")"
+  if [[ "$fmt" != "$CANON" ]]; then
+    ffmpeg -loglevel error -y -i "$wav" -c:a pcm_s16le -ar 44100 -ac 1 "$wav.tmp.wav" && mv "$wav.tmp.wav" "$wav"
+  fi
+done
+
 # --- durations + joined narration -------------------------------------------
 "${PY[@]}" - "$AUDIO" <<'PY'
 import json, pathlib, subprocess, sys
@@ -113,9 +127,22 @@ for wav in sorted(audio.glob("beat-*.wav")):
 (audio / "concat.txt").write_text("\n".join(lines) + "\n")
 print(f"narration: {sum(dur.values()):.1f} s over {len(dur)} beats")
 PY
-ffmpeg -loglevel error -y -f lavfi -i anullsrc=r=44100:cl=mono -t 0.4 "$AUDIO/silence.wav"
+ffmpeg -loglevel error -y -f lavfi -i anullsrc=r=44100:cl=mono -t 0.4 -c:a pcm_s16le "$AUDIO/silence.wav"
 ffmpeg -loglevel error -y -f concat -safe 0 -i "$AUDIO/concat.txt" -ar 44100 -ac 1 "$AUDIO/narration.wav"
+# Guard: the picture is timed from durations.json, so the joined narration must
+# match it. A mismatch means a clip format slipped through, so stop instead of drifting.
+"${PY[@]}" - "$AUDIO" <<'PY'
+import json, pathlib, subprocess, sys
+audio = pathlib.Path(sys.argv[1])
+expected = sum(json.loads((audio / "durations.json").read_text()).values())
+actual = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                        "-of", "default=nw=1:nk=1", str(audio / "narration.wav")]))
+if abs(actual - expected) > 0.1:
+    sys.exit(f"ERROR: narration is {actual:.2f} s but the beats add up to {expected:.2f} s "
+             f"({actual - expected:+.2f} s). Voice and picture would drift. Check the beat clip formats.")
+PY
 echo "audio: $AUDIO/narration.wav"
+[[ "${STOP_AFTER_AUDIO:-}" == 1 ]] && exit 0   # test hook: audio stage only
 
 # --- render scene ------------------------------------------------------------
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
