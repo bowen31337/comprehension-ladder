@@ -117,10 +117,13 @@ Tell the user which engine produced the audio. If it fell back to `say`, mention
 
 `scripts/render_video.sh explainers/<slug>` does this:
 1. Checks for `uv`, `ffmpeg`, `ffprobe` and a TTS engine. If one is missing, it prints the install command and exits with code 2.
-2. Writes one audio file per beat into `audio/`, and `audio/durations.json`.
-3. Joins the beat audio into `audio/narration.wav`.
-4. Renders the scene: `manim -qh scene.py Explainer` if Manim is present and `scene.py` exists. Otherwise it runs `scene_frames.py` through uv. `QUALITY=l` gives a fast draft.
-5. Combines video and audio with ffmpeg into `<slug>.mp4`, and prints the renderer and the voice.
+2. Writes one audio file per beat into `audio/`, and `audio/durations.json`. A beat is voiced again only when its text or the voice settings change. `beat-NN.key` holds a hash of both. Beats removed from `narration.md` are deleted. So after you edit one beat, a re-render voices only that beat.
+3. Converts every beat to 44100 Hz mono. Engines differ (Piper is often 22050 Hz). Mixed rates would make the pauses play at the wrong length and the voice would drift behind the picture. After the join, the script stops with an error if the narration length does not match the beat timing.
+4. Joins the beat audio into `audio/narration.wav`.
+5. Renders the scene: `manim -qh scene.py Explainer` if Manim is present and `scene.py` exists. Otherwise it runs `scene_frames.py` through uv. `QUALITY=l` gives a fast draft.
+6. Combines video and audio with ffmpeg into `<slug>.mp4`, and prints the renderer and the voice.
+
+`scripts/test_render_audio.sh` tests the audio stage (sample-rate timing and the cache) with ffmpeg and uv only.
 
 Install commands (macOS), for the user to approve:
 ```bash

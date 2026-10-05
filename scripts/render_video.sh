@@ -71,13 +71,31 @@ if not beats:
 for n, text in beats.items():
     text = re.sub(r"[*_`]", "", text)  # drop markdown emphasis before speech
     (out / f"beat-{n:02d}.txt").write_text(text + "\n", encoding="utf-8")
-print(f"{len(beats)} beats")
+# A shorter narration must not leave old beats behind: later steps glob beat-*.
+stale = [f for f in out.glob("beat-*") if int(f.name[5:7]) not in beats]
+for f in stale:
+    f.unlink()
+print(f"{len(beats)} beats" + (f", removed {len(stale)} stale files" if stale else ""))
 PY
 
 # --- synthesize each beat ----------------------------------------------------
+# Cache: beat-NN.key holds a hash of the voice settings and the beat text. A beat
+# is voiced again only when that hash changes (edited text, or another engine or
+# voice). Timestamps cannot work here: the splitter rewrites every .txt each run.
+case "$ENGINE" in
+  elevenlabs) VOICE_DESC="elevenlabs|${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8NUfJ}|eleven_multilingual_v2" ;;
+  piper)      VOICE_DESC="piper|$PIPER_MODEL" ;;
+  custom)     VOICE_DESC="custom|$TTS_CMD" ;;
+  say)        VOICE_DESC="say" ;;
+esac
+sha() { if have sha256sum; then sha256sum; else shasum -a 256; fi | cut -d' ' -f1; }
+voiced=0
 for txt in "$AUDIO"/beat-*.txt; do
-  wav="${txt%.txt}.wav"
-  [[ -f "$wav" && "$wav" -nt "$txt" ]] && continue
+  wav="${txt%.txt}.wav"; keyf="${txt%.txt}.key"
+  key="$( { printf '%s\n' "$VOICE_DESC"; cat "$txt"; } | sha)"
+  [[ -f "$wav" && -f "$keyf" && "$(cat "$keyf")" == "$key" ]] && continue
+  rm -f "$keyf"
+  voiced=$((voiced + 1))
   case "$ENGINE" in
     elevenlabs)
       voice="${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8NUfJ}"
@@ -96,7 +114,9 @@ for txt in "$AUDIO"/beat-*.txt; do
       ffmpeg -loglevel error -y -i "${txt%.txt}.aiff" -ar 44100 -ac 1 "$wav"
       rm -f "${txt%.txt}.aiff" ;;
   esac
+  [[ -s "$wav" ]] && printf '%s\n' "$key" > "$keyf"   # only after a successful voice
 done
+echo "voiced $voiced beat(s), reused the rest from the cache"
 
 # --- one canonical format for every clip -------------------------------------
 # The concat demuxer below takes its stream format from the first file and reads

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Regression test: narration timing must not depend on the TTS engine's sample rate.
+# Regression tests for the audio stage of render_video.sh:
+#  1. narration timing must not depend on the TTS engine's sample rate
+#  2. the beat audio cache re-voices only what changed
 #
-# Bug: Piper / TTS_CMD audio kept its native rate (e.g. 22050 Hz) while the
+# Timing bug: Piper / TTS_CMD audio kept its native rate (e.g. 22050 Hz) while the
 # 0.4 s pauses were 44100 Hz. The concat demuxer read every pause at the first
 # file's rate, so each pause played as 0.8 s and the voice drifted 0.4 s per beat
 # behind the picture (5.6 s over 14 beats).
@@ -42,4 +44,27 @@ run_case "all-22050" \
 run_case "mixed-44100-16000" \
   'case {in} in *beat-01.txt) r=44100;; *) r=16000;; esac; ffmpeg -loglevel error -y -f lavfi -i "sine=frequency=440:duration=1.5" -ar $r -ac 1 {out}' || fail=1
 
-[[ $fail == 0 ]] && echo "all audio timing tests passed" || { echo "audio timing tests FAILED"; exit 1; }
+# ---------------------------------------------------------------------------
+# Audio cache: re-voice only what changed. A fake engine logs each call.
+CDIR="$TMP/cache"; COUNT="$TMP/calls.log"; mkdir -p "$CDIR"
+echo "# test placeholder" > "$CDIR/scene.py"
+engine() {  # $1 = tone frequency; a different frequency stands for a different voice
+  echo "echo {in} >> '$COUNT'; ffmpeg -loglevel error -y -f lavfi -i \"sine=frequency=$1:duration=1\" -ar 22050 -ac 1 {out}"
+}
+narrate() { for i in $(seq 1 "$1"); do echo "$i. Beat number $i${2:+ $2}."; done > "$CDIR/narration.md"; }
+render() { : > "$COUNT"; STOP_AFTER_AUDIO=1 TTS=custom TTS_CMD="$(engine "$1")" bash "$HERE/render_video.sh" "$CDIR" >/dev/null; wc -l < "$COUNT" | tr -d ' '; }
+check() {  # name, got, want
+  if [[ "$2" == "$3" ]]; then echo "PASS cache $1: $2"; else echo "FAIL cache $1: got $2, want $3"; fail=1; fi
+}
+
+narrate 14;  check "first run voices every beat" "$(render 440)" 14
+check "unchanged second run voices nothing" "$(render 440)" 0
+sed -i.bak 's/^3\. Beat number 3\./3. Beat number 3, now with new words./' "$CDIR/narration.md" && rm -f "$CDIR/narration.md.bak"
+check "one edited beat voices one beat" "$(render 440)" 1
+check "a different voice re-voices every beat" "$(render 550)" 14
+narrate 10;  render 550 >/dev/null
+check "shorter narration: beats in durations.json" \
+  "$(uv run --no-project --quiet python -c "import json,sys;print(len(json.load(open(sys.argv[1]))))" "$CDIR/audio/durations.json")" 10
+check "shorter narration: leftover beat files" "$(find "$CDIR/audio" -name 'beat-1[1-4].*' | wc -l | tr -d ' ')" 0
+
+[[ $fail == 0 ]] && echo "all audio tests passed" || { echo "audio tests FAILED"; exit 1; }

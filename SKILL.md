@@ -143,5 +143,6 @@ Do not add a preamble about the skill, a list of the rules you applied, or a clo
 - `references/video-pipeline.md`: Manim scene pattern, narration beats, TTS choices, ffmpeg commands.
 - `scripts/ste-lint.py`: structural STE linter with `--strictness` and HTML/SVG text extraction. `--selftest` checks it.
 - `scripts/render_video.sh`: TTS → Manim or frames.py → ffmpeg pipeline with tool detection.
+- `scripts/test_render_audio.sh`: regression tests for the audio stage of `render_video.sh` (timing across sample rates, beat cache).
 - `scripts/frames.py`: numpy + Pillow frame renderer for rung 4 when Manim is missing. Runs through `uv run`.
 - `assets/html-explainer-template.html`: starting point for rung 3.
