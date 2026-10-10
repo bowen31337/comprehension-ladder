@@ -369,7 +369,7 @@
   textarea { min-height: 132px; resize: vertical; display: block; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-  .chip { min-height: 40px; padding: 0 14px; font-size: .875rem; font-weight: 500; background: var(--fill-3); color: var(--label); }
+  .chip { display: inline-flex; align-items: center; border-radius: 999px; min-height: 40px; padding: 0 14px; font-size: .875rem; font-weight: 500; background: var(--fill-3); color: var(--label); }
   .chip:hover { background: var(--fill-1); text-decoration: none; }
   a.chip { color: var(--accent); }
 
@@ -436,6 +436,8 @@
   .pipe .ar { color: var(--label-tertiary); }
 
   .figure video { display: block; width: 100%; border-radius: var(--radius-md); background: #0e1116; }
+  /* Chrome sizes cues from the video height, which is too small on a phone. */
+  video::cue { font-size: clamp(.8125rem, .62rem + .9vw, 1.25rem); font-family: var(--font-sans); font-weight: 500; line-height: 1.35; color: #fff; background: rgba(0, 0, 0, .72); }
   .limits ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
   .hedgeword { text-decoration: underline dashed var(--label-tertiary); text-underline-offset: 4px; }
   .note { font-size: .8125rem; line-height: 1.45; color: var(--label-secondary); margin: 10px 2px 0; }
@@ -591,8 +593,9 @@
     <div class="figure card">
       <video controls preload="metadata" playsinline aria-label="Rung 4: narrated explainer video">
         <source src="video/comprehension-ladder-how-it-works.mp4" type="video/mp4">
+        <track kind="captions" src="video/comprehension-ladder-how-it-works.vtt" srclang="en" label="English" default>
       </video>
-      <p class="caption">Rung 4: an 89-second narrated video with 14 beats. The skill drew it with frames.py and the macOS say voice, with no installs.</p>
+      <p class="caption">Rung 4: an 89-second narrated video with 14 beats. The skill drew it with frames.py and the macOS say voice, with no installs. The captions come from the same beat lengths as the voice. The captions control in the player turns them on or off.</p>
       <div class="chips">
         <a class="chip" href="https://github.com/bowen31337/comprehension-ladder/blob/main/examples/how-it-works/explanation.md">Rung 1: STE prose</a>
         <a class="chip" href="how-it-works.svg">Rung 2: diagram (SVG)</a>

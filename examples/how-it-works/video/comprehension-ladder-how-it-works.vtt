@@ -1,0 +1,76 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.523
+This video explains the comprehension ladder.
+
+00:00:02.523 --> 00:00:06.007
+It is a skill that helps a person understand something.
+
+00:00:06.007 --> 00:00:11.235
+The skill has four rungs. Prose, a diagram, a web page, and a video.
+
+00:00:11.235 --> 00:00:13.480
+This video is rung four.
+
+00:00:13.480 --> 00:00:17.710
+You ask a question. The skill reads your words and picks a rung.
+
+00:00:17.710 --> 00:00:19.212
+It also picks a strictness.
+
+00:00:19.212 --> 00:00:23.673
+The default is eighty percent of the way to Simplified Technical English.
+
+00:00:23.673 --> 00:00:25.653
+Strictness sets the sentence limit.
+
+00:00:25.653 --> 00:00:29.504
+At eighty percent, a sentence has twenty five words or fewer.
+
+00:00:29.504 --> 00:00:33.154
+Before it makes anything, the skill writes one outline.
+
+00:00:33.154 --> 00:00:36.740
+Claims, mechanism, hedges, and one real example.
+
+00:00:36.740 --> 00:00:41.442
+Every rung shows that same outline. When you climb, the form changes.
+
+00:00:41.442 --> 00:00:43.478
+The facts stay the same.
+
+00:00:43.478 --> 00:00:45.156
+Rule one. Keep every hedge.
+
+00:00:45.156 --> 00:00:50.962
+If the source says "may be caused by a race condition", the skill keeps the word "may".
+
+00:00:50.962 --> 00:00:57.113
+Rule two. Add no facts. If a diff does not say why, the explanation says so.
+
+00:00:57.113 --> 00:01:02.572
+A linter checks the text. It finds long sentences, semicolons and marketing words.
+
+00:01:02.572 --> 00:01:04.503
+It never flags a hedge.
+
+00:01:04.503 --> 00:01:07.466
+A video needs a voice, a renderer and ffmpeg.
+
+00:01:07.466 --> 00:01:10.500
+The skill uses the first voice it finds.
+
+00:01:10.500 --> 00:01:15.632
+If Manim is not installed, a small renderer draws each frame with numpy and Pillow.
+
+00:01:15.632 --> 00:01:17.824
+This video was made that way.
+
+00:01:17.824 --> 00:01:22.181
+The linter checks form only. It cannot tell if an explanation is true.
+
+00:01:22.181 --> 00:01:25.194
+The outline and the two rules do that job.
+
+00:01:25.194 --> 00:01:29.035
+So pick a rung, keep the facts, and climb when you need more.

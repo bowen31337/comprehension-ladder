@@ -132,20 +132,50 @@ for wav in "$AUDIO"/beat-*.wav; do
   fi
 done
 
-# --- durations + joined narration -------------------------------------------
-"${PY[@]}" - "$AUDIO" <<'PY'
-import json, pathlib, subprocess, sys
-audio = pathlib.Path(sys.argv[1])
-dur, lines = {}, []
+# --- durations + joined narration + captions ---------------------------------
+# Captions (<slug>.vtt) use the same measured beat lengths as the picture, so they
+# stay in step with the voice. A web page loads them with <track kind="captions">.
+"${PY[@]}" - "$AUDIO" "$DIR/$SLUG.vtt" <<'PY'
+import json, pathlib, re, subprocess, sys
+audio, vtt = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+
+def stamp(t):
+    m, s = divmod(t, 60)
+    return f"{int(m // 60):02d}:{int(m % 60):02d}:{s:06.3f}"
+
+def chunks(text, limit=84):
+    """Group sentences into cues of at most two ~42-character caption lines.
+    A single sentence longer than the limit stays whole; the player wraps it."""
+    out = []
+    for sentence in re.split(r"(?<=[.!?])\s+", text.strip()):
+        if out and len(out[-1]) + 1 + len(sentence) <= limit:
+            out[-1] += " " + sentence
+        else:
+            out.append(sentence)
+    return out
+
+dur, lines, cues, t = {}, [], [], 0.0
 for wav in sorted(audio.glob("beat-*.wav")):
     n = int(wav.stem.split("-")[1])
     s = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                                        "-of", "default=nw=1:nk=1", str(wav)]).strip())
     dur[str(n)] = round(s + 0.4, 2)  # 0.4 s breath between beats
     lines.append(f"file '{wav.name}'\nduration {s:.3f}\nfile 'silence.wav'")
+    # Split the beat's time across its cues by length of text (an estimate inside
+    # one beat; beat edges are exact). The last cue holds through the breath.
+    parts = chunks(wav.with_suffix(".txt").read_text(encoding="utf-8"))
+    total = sum(len(p) for p in parts)
+    start = t
+    for i, p in enumerate(parts):
+        end = t + s + 0.4 if i == len(parts) - 1 else start + s * len(p) / total
+        cues.append(f"{stamp(start)} --> {stamp(end)}\n{p}")
+        start = end
+    t += s + 0.4
 (audio / "durations.json").write_text(json.dumps(dur, indent=2))
 (audio / "concat.txt").write_text("\n".join(lines) + "\n")
+vtt.write_text("WEBVTT\n\n" + "\n\n".join(cues) + "\n", encoding="utf-8")
 print(f"narration: {sum(dur.values()):.1f} s over {len(dur)} beats")
+print(f"captions: {vtt} ({len(cues)} cues)")
 PY
 ffmpeg -loglevel error -y -f lavfi -i anullsrc=r=44100:cl=mono -t 0.4 -c:a pcm_s16le "$AUDIO/silence.wav"
 ffmpeg -loglevel error -y -f concat -safe 0 -i "$AUDIO/concat.txt" -ar 44100 -ac 1 "$AUDIO/narration.wav"

@@ -67,4 +67,42 @@ check "shorter narration: beats in durations.json" \
   "$(uv run --no-project --quiet python -c "import json,sys;print(len(json.load(open(sys.argv[1]))))" "$CDIR/audio/durations.json")" 10
 check "shorter narration: leftover beat files" "$(find "$CDIR/audio" -name 'beat-1[1-4].*' | wc -l | tr -d ' ')" 0
 
+# ---------------------------------------------------------------------------
+# Captions: <slug>.vtt follows the narration. Cues come from the beat text and the
+# measured beat lengths, so they must end where the narration ends. A long beat
+# splits at sentences into cues of about two caption lines.
+VDIR="$TMP/captions"; mkdir -p "$VDIR"
+echo "# test placeholder" > "$VDIR/scene.py"
+{
+  echo "1. A *short* beat."
+  echo "2. This is the first sentence of a long beat. Here is a second sentence with more words. And a third one ends it."
+  echo "3. The last beat."
+} > "$VDIR/narration.md"
+STOP_AFTER_AUDIO=1 TTS=custom TTS_CMD='ffmpeg -loglevel error -y -f lavfi -i "sine=frequency=440:duration=2" -ar 22050 -ac 1 {out}' \
+  bash "$HERE/render_video.sh" "$VDIR" >/dev/null
+uv run --no-project --quiet python - "$VDIR" <<'PY' || fail=1
+import re, subprocess, sys, pathlib
+d = pathlib.Path(sys.argv[1]); vtt = d / "captions.vtt"
+def result(name, ok, detail=""):
+    print(f"{'PASS' if ok else 'FAIL'} captions {name}{': ' + detail if detail else ''}")
+    return ok
+if not result("file written", vtt.exists(), str(vtt.name)):
+    sys.exit(1)
+text = vtt.read_text(encoding="utf-8")
+secs = lambda s: (lambda h, m, x: int(h) * 3600 + int(m) * 60 + float(x))(*s.split(":"))
+cues = [(secs(a), secs(b), body.strip()) for a, b, body in
+        re.findall(r"(\d\d:\d\d:\d\d\.\d{3}) --> (\d\d:\d\d:\d\d\.\d{3})\n(.+?)(?:\n\n|\Z)", text, re.S)]
+narr = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                      "-of", "default=nw=1:nk=1", str(d / "audio" / "narration.wav")]))
+ok = all([
+    result("header", text.startswith("WEBVTT\n")),
+    result("cue count", len(cues) >= 4, f"{len(cues)} cues for 3 beats"),
+    result("times move forward", all(a < b for a, b, _ in cues) and all(c[1] <= n[0] + 1e-3 for c, n in zip(cues, cues[1:]))),
+    result("ends with the narration", abs(cues[-1][1] - narr) < 0.05, f"last cue {cues[-1][1]:.2f} s, narration {narr:.2f} s"),
+    result("markdown removed", "*" not in text and "A short beat." in text),
+    result("long beat split", max(len(c[2]) for c in cues) <= 84, f"longest cue {max(len(c[2]) for c in cues)} chars"),
+])
+sys.exit(0 if ok else 1)
+PY
+
 [[ $fail == 0 ]] && echo "all audio tests passed" || { echo "audio tests FAILED"; exit 1; }

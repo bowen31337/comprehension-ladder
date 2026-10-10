@@ -10,6 +10,7 @@ explainers/<slug>/
 ├── scene.py          # Manim Community scene, class Explainer (if manim is installed)
 ├── scene_frames.py   # OR: frames.py scene (no manim needed)
 ├── audio/            # one WAV/MP3 per beat (made by render_video.sh)
+├── <slug>.vtt        # captions, one cue per beat or sentence group (made by render_video.sh)
 └── <slug>.mp4        # final video (made by render_video.sh)
 ```
 
@@ -119,11 +120,11 @@ Tell the user which engine produced the audio. If it fell back to `say`, mention
 1. Checks for `uv`, `ffmpeg`, `ffprobe` and a TTS engine. If one is missing, it prints the install command and exits with code 2.
 2. Writes one audio file per beat into `audio/`, and `audio/durations.json`. A beat is voiced again only when its text or the voice settings change. `beat-NN.key` holds a hash of both. Beats removed from `narration.md` are deleted. So after you edit one beat, a re-render voices only that beat.
 3. Converts every beat to 44100 Hz mono. Engines differ (Piper is often 22050 Hz). Mixed rates would make the pauses play at the wrong length and the voice would drift behind the picture. After the join, the script stops with an error if the narration length does not match the beat timing.
-4. Joins the beat audio into `audio/narration.wav`.
+4. Joins the beat audio into `audio/narration.wav`. It also writes `<slug>.vtt`, a WebVTT captions file. The cues use the same measured beat lengths as the picture, so beat edges are exact. A long beat splits at sentences into cues of about two caption lines. Inside a beat, each cue gets time in proportion to its text length.
 5. Renders the scene: `manim -qh scene.py Explainer` if Manim is present and `scene.py` exists. Otherwise it runs `scene_frames.py` through uv. `QUALITY=l` gives a fast draft.
 6. Combines video and audio with ffmpeg into `<slug>.mp4`, and prints the renderer and the voice.
 
-`scripts/test_render_audio.sh` tests the audio stage (sample-rate timing and the cache) with ffmpeg and uv only.
+`scripts/test_render_audio.sh` tests the audio stage (sample-rate timing, the cache and the captions) with ffmpeg and uv only.
 
 Install commands (macOS), for the user to approve:
 ```bash
@@ -136,3 +137,16 @@ uv tool install piper-tts      # optional better local voice, plus a .onnx voice
 ## When tools are missing
 
 Missing Manim is not a reason to stop. Use the frames path and deliver a video. Only a missing `ffmpeg` or `uv` blocks the video. In that case, deliver `narration.md` and the scene, state what is missing, and give the exact command. Do not claim a video exists when it does not.
+
+## 5. Captions on a web page
+
+Ship `<slug>.vtt` next to the MP4. In a rung-3 page, add a `<track>` inside the `<video>`, so that a reader with the sound off can follow the narration:
+
+```html
+<video controls preload="metadata" playsinline>
+  <source src="video/<slug>.mp4" type="video/mp4">
+  <track kind="captions" src="video/<slug>.vtt" srclang="en" label="English" default>
+</video>
+```
+
+`default` shows the captions at once. The reader turns them off in the player. The page must come from a web server: a browser does not load a track from a `file://` page. Keep the captions as a track, not burned into the picture. A track is real text, so screen readers and search can use it.
