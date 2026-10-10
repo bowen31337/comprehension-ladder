@@ -482,10 +482,11 @@
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => window.dispatchEvent(new Event("themechange")));
     applyTheme(modes.includes(store.get("cl-theme")) ? store.get("cl-theme") : "auto");
 
-    // Slider fill follows the thumb.
+    // Slider fill follows the thumb. One listener also covers sliders that figures add later.
     const fill = r => r.style.setProperty("--pct", ((r.value - r.min) / (r.max - r.min) * 100) + "%");
-    document.querySelectorAll('input[type="range"]').forEach(r => { fill(r); r.addEventListener("input", () => fill(r)); });
+    document.addEventListener("input", e => { if (e.target.matches('input[type="range"]')) fill(e.target); });
     window.syncRanges = () => document.querySelectorAll('input[type="range"]').forEach(fill);
+    syncRanges();
 
     // Contents list, built from each section heading.
     const sections = [...document.querySelectorAll("main section")].filter(s => s.querySelector("h2"));
