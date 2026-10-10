@@ -7,9 +7,14 @@ The page exists to make one idea click for one reader. It is discardable. Spend 
 ## Shape
 
 Start from `assets/html-explainer-template.html`. It gives you:
-- light and dark themes from CSS variables
-- a centered column that works at 360px width
-- a header, a "the short version" box, numbered sections, and a `.figure` block with a canvas or SVG plus controls and a caption
+- Apple system tokens with light and dark themes, and an Auto / Light / Dark control. Figures redraw on the `themechange` event.
+- a mobile-first layout: a glass header that shows the title after the hero scrolls away, a main column, a contents sidebar and a footer
+- on phones, the sidebar is a bottom sheet. A floating "Contents" capsule opens it. You can drag the sheet to close it. At 1024px and wider, the sidebar is a sticky glass column.
+- a contents list that the page builds from each `section > h2`. You do not edit the list.
+- a hero, a "the short version" card, numbered sections, and a `.figure.card` block with a canvas or SVG plus controls and a caption
+- touch targets of 44px or more, large slider thumbs, and fallbacks for reduced motion, reduced transparency and high contrast
+
+Edit only the content in `<main>`, the footer text and the "Figures" script block. Leave the "Page chrome" script block as it is. After you set a slider value from JS, call `syncRanges()` so that the slider fill moves too.
 
 Typical page:
 1. **Title and one-sentence summary.**
